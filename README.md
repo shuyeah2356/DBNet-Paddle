@@ -70,5 +70,5 @@ A为原始区域的面积，L为原始区域的周长，r为收缩系数，取0.
 3、通过`probability`和`thresh`计算得到`approximate_map`
 
 
-$$\hat{B}_{i,j}=\frac{1}{1+e^{-k(P_{i,j}-T_{i.j})}}$$
+$$\hat{B_{i,j}}=\frac{1}{1+e^{-k(P_{i,j}-T_{i.j})}}$$
 
