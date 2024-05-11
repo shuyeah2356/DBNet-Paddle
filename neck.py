@@ -163,19 +163,19 @@ class DBFPN(nn.Layer):
         in2 = self.in2_conv(c2)
 
         out4 = in4 + F.upsample(
-            in5, scale_factor=2, mode="nearest", align_mode=1)  # 1/16
+            in5, scale_factor=2, mode="nearest", align_mode=1)  # 1/16,C5经过上采样与C4叠加，得到out4
         out3 = in3 + F.upsample(
-            out4, scale_factor=2, mode="nearest", align_mode=1)  # 1/8
+            out4, scale_factor=2, mode="nearest", align_mode=1)  # 1/8，out4经过上采样与C3叠加，得到out3
         out2 = in2 + F.upsample(
-            out3, scale_factor=2, mode="nearest", align_mode=1)  # 1/4
+            out3, scale_factor=2, mode="nearest", align_mode=1)  # 1/4,out3经过上采样与C2叠加，得到out2
 
-        p5 = self.p5_conv(in5)
-        p4 = self.p4_conv(out4)
-        p3 = self.p3_conv(out3)
-        p2 = self.p2_conv(out2)
-        p5 = F.upsample(p5, scale_factor=8, mode="nearest", align_mode=1)
-        p4 = F.upsample(p4, scale_factor=4, mode="nearest", align_mode=1)
-        p3 = F.upsample(p3, scale_factor=2, mode="nearest", align_mode=1)
+        p5 = self.p5_conv(in5)  # C5调整通道数的得到P5
+        p4 = self.p4_conv(out4) # out4调整通道数得到P4
+        p3 = self.p3_conv(out3) # out3调整通道数得到P3
+        p2 = self.p2_conv(out2) # out2调整通道数得到P2
+        p5 = F.upsample(p5, scale_factor=8, mode="nearest", align_mode=1)   # P5经过8次上采样得到原始特征图大小1/2的特征层
+        p4 = F.upsample(p4, scale_factor=4, mode="nearest", align_mode=1)   # P4经过4次上采样得到原始特征图大小1/2的特征层
+        p3 = F.upsample(p3, scale_factor=2, mode="nearest", align_mode=1)   # P3经过2次上采样得到原始特征图大小1/2的特征层
 
         fuse = paddle.concat([p5, p4, p3, p2], axis=1)
 

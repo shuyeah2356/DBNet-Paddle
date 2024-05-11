@@ -20,7 +20,7 @@ def get_bias_attr(k):
 class Head(nn.Layer):
     def __init__(self, in_channels, kernel_list=[3, 2, 2], **kwargs):
         super(Head, self).__init__()
-
+        # 3×3卷积，输出通道数变为输入通道数1/4，p=1
         self.conv1 = nn.Conv2D(
             in_channels=in_channels,
             out_channels=in_channels // 4,
@@ -28,6 +28,7 @@ class Head(nn.Layer):
             padding=int(kernel_list[0] // 2),
             weight_attr=ParamAttr(),
             bias_attr=False)
+        # batch_normalization
         self.conv_bn1 = nn.BatchNorm(
             num_channels=in_channels // 4,
             param_attr=ParamAttr(
@@ -35,7 +36,7 @@ class Head(nn.Layer):
             bias_attr=ParamAttr(
                 initializer=paddle.nn.initializer.Constant(value=1e-4)),
             act='relu')
-
+        # 反卷积，上采样，宽高边缘原来二倍，通道数不变
         self.conv2 = nn.Conv2DTranspose(
             in_channels=in_channels // 4,
             out_channels=in_channels // 4,
@@ -44,6 +45,7 @@ class Head(nn.Layer):
             weight_attr=ParamAttr(
                 initializer=paddle.nn.initializer.KaimingUniform()),
             bias_attr=get_bias_attr(in_channels // 4))
+        # batch_normalization
         self.conv_bn2 = nn.BatchNorm(
             num_channels=in_channels // 4,
             param_attr=ParamAttr(
@@ -51,6 +53,7 @@ class Head(nn.Layer):
             bias_attr=ParamAttr(
                 initializer=paddle.nn.initializer.Constant(value=1e-4)),
             act="relu")
+        # 反卷积上采样，宽高变为原来二倍，通道数变为1
         self.conv3 = nn.Conv2DTranspose(
             in_channels=in_channels // 4,
             out_channels=1,
@@ -85,9 +88,10 @@ class DBHead(nn.Layer):
     def __init__(self, in_channels, k=50, **kwargs):
         super(DBHead, self).__init__()
         self.k = k
+        # 得到原始图片大小1/4的特征图，分别是thresh和binary
         self.binarize = Head(in_channels, **kwargs)
         self.thresh = Head(in_channels, **kwargs)
-
+    # 1+e^(-k（probability-thresh）)
     def step_function(self, x, y):
         return paddle.reciprocal(1 + paddle.exp(-self.k * (x - y)))
 

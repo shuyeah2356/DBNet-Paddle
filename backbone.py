@@ -17,6 +17,7 @@ from paddle.vision.ops import DeformConv2D
 from paddle.regularizer import L2Decay
 from paddle.nn.initializer import Normal, Constant, XavierUniform
 
+
 class DeformableConvV2(nn.Layer):
     def __init__(self,
                  in_channels,
@@ -87,6 +88,9 @@ class DeformableConvV2(nn.Layer):
 
 
 class ConvBNLayer(nn.Layer):
+    """
+    下采样，卷积，batch_normalization
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -331,3 +335,4 @@ class ResNet(nn.Layer):
             if i in self.out_indices:
                 out.append(y)
         return out
+
